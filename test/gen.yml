@@ -1,0 +1,7 @@
+Insert:
+  import:
+    - "os"
+  func: |
+    func Insert{{.TypeName}}(data *{{.TypeName}}) {
+    }
+
