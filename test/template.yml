@@ -1,0 +1,4 @@
+Insert: |
+  func Insert{{.TypeName}}(data *{{.TypeName}}) {
+  }
+
