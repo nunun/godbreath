@@ -1,2 +1,2 @@
 # godbreath
-go dbr eath CRUD function generator.
+go + dbr + eath CRUD function generator.
