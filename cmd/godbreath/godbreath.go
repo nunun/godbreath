@@ -39,7 +39,13 @@ func main() {
     flag.StringVar(&tpath, "t", "gen.yml", "template path")
     flag.Parse();
     if flag.NArg() < 1 {
-        panic("path did not specified.")
+        fmt.Println("godbreath [-t <template path>] <source path>")
+        fmt.Println("  ex) godbreath -t gen.yml src/")
+        fmt.Println("")
+        flag.PrintDefaults()
+        fmt.Println("")
+        fmt.Println("error: <source path> did not specified.")
+        return
     }
     Generate(flag.Arg(0), tpath)
 }
