@@ -1,7 +1,7 @@
 package main
 
 import (
-    _ "os"
+    "os"
     "fmt"
     "log"
     "go/ast"
@@ -10,6 +10,7 @@ import (
     "path"
     "flag"
     "bytes"
+    "bufio"
     "strings"
     "reflect"
     "path/filepath"
@@ -57,6 +58,9 @@ func Generate(generatePath string, templatePath string) {
 
     // generate _gen.go from source file.
     for _, f := range files {
+        if strings.HasSuffix(f, "_gen.go") {
+            continue // 生成ファイルは処理しない。
+        }
         var ext = filepath.Ext(f)
         var of  = fmt.Sprintf("%s_gen.go", f[0:len(f)-len(ext)])
         GenerateSourceFile(f, of, tmap)
@@ -73,6 +77,7 @@ func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Te
     }
 
     // gather struct type informations
+    outputPackage := src.Name.Name
     outputImports := []string{}
     outputFuncs   := []string{}
     for _, decl := range src.Decls {
@@ -113,10 +118,35 @@ func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Te
         }
     }
 
+    // unique imports array
+    set := make(map[string]bool, 0)
+    for _, item := range outputImports {
+        set[item] = true
+    }
+    outputImports = []string{}
+    for k, _ := range set {
+        outputImports = append(outputImports, k)
+    }
+
     // output _gen.go
-    // TODO
-    fmt.Println(outputImports)
-    fmt.Println(outputFuncs)
+    fp := NewFile(outputPath)
+    defer fp.Close()
+    writer := bufio.NewWriter(fp)
+    fmt.Fprintf(writer, "package %s\n", outputPackage)
+    for _, item := range outputImports {
+        _, err := fmt.Fprintf(writer, "import \"%s\"\n", item)
+        if err != nil {
+            panic(err)
+        }
+    }
+    for _, item := range outputFuncs {
+        _, err := fmt.Fprintf(writer, "%s\n", item)
+        if err != nil {
+            panic(err)
+        }
+    }
+    writer.Flush()
+    fmt.Println("Generated", outputPath)
     return true
 }
 
@@ -195,5 +225,14 @@ func LoadTemplate(templatePath string) map[string]*Template {
         tmap[k] = &Template{templateImports, templateFunc}
     }
     return tmap
+}
+
+
+func NewFile(fn string) *os.File {
+    fp, err := os.OpenFile(fn, os.O_WRONLY | os.O_CREATE, 0644)
+    if err != nil {
+        panic(err)
+    }
+    return fp
 }
 

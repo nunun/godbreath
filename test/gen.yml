@@ -1,6 +1,8 @@
 Insert:
   import:
     - "os"
+    - "os"
+    - "os"
   func: |
     func Insert{{.TypeName}}(data *{{.TypeName}}) {
       // TypeName       = {{.TypeName}}
