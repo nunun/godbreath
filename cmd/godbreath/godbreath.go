@@ -40,15 +40,18 @@ func main() {
 }
 
 func Generate(generatePath string, templatePath string) {
+    // load gen.yml
     tpath := path.Join(generatePath, templatePath)
     tmap  := LoadTemplate(tpath)
 
+    // gather targets
     gpath := path.Join(generatePath, "*.go")
     files, err := filepath.Glob(gpath)
     if err != nil {
         panic(err)
     }
 
+    // generate _gen.go from source file.
     for _, f := range files {
         var ext = filepath.Ext(f)
         var of  = fmt.Sprintf("%s_gen.go", f[0:len(f)-len(ext)])
@@ -65,7 +68,7 @@ func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Te
         return false
     }
 
-    // gather struct informations
+    // gather struct type informations
     outputImports := []string{}
     outputFuncs   := []string{}
     for _, decl := range src.Decls {
@@ -108,6 +111,7 @@ func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Te
 }
 
 func GenerateStruct(s *ast.TypeSpec, t *ast.StructType, temp *Template) (typeImports []string, typeFunc string) {
+    // type name and fields
     TypeName    := s.Name.String()
     type_fields := []string{}
     for _, f := range t.Fields.List {
@@ -116,33 +120,40 @@ func GenerateStruct(s *ast.TypeSpec, t *ast.StructType, temp *Template) (typeImp
         fmt.Println(f.Comment.Text()) // Field Comment
     }
 
+    // expand template
     vars := &TypeVars {TypeName, type_fields}
     buf  := &bytes.Buffer{}
     err  := temp.TemplateFunc.Execute(buf, vars)
     if err != nil {
         panic(err)
     }
+
+    // function results
     typeImports = temp.TemplateImports
     typeFunc    = buf.String()
     return
 }
 
 func LoadTemplate(templatePath string) map[string]*Template {
+    // read gen.yml
     buf, err := ioutil.ReadFile(templatePath)
     if err != nil {
         panic(err)
     }
 
+    // parse gen.yml
     d := make(map[string]interface{})
     err = yaml.Unmarshal(buf, &d)
     if err != nil {
         panic(err)
     }
 
+    // seek elements
     tmap := make(map[string]*Template)
     for k, v := range d {
         m := v.(map[interface{}]interface{})
 
+        // import
         templateImports := []string{}
         if m["import"] != nil {
             items := m["import"].([]interface{})
@@ -151,94 +162,15 @@ func LoadTemplate(templatePath string) map[string]*Template {
             }
         }
 
+        // func
         templateFunc, err := template.New(k).Parse(m["func"].(string))
         if err != nil {
             panic(err)
         }
 
+        // push all information into map
         tmap[k] = &Template{templateImports, templateFunc}
     }
     return tmap
 }
-
-//fset := token.NewFileSet()
-//file, err := parser.ParseFile(fset, "test/user.go", nil, parser.ParseComments)
-//if err != nil {
-//    panic(err)
-//}
-//for _, decl := range file.Decls {
-//    switch d := decl.(type) {
-//    case *ast.GenDecl:
-//        switch d.Tok {
-//        case token.IMPORT:
-//            fmt.Println("### import")
-//            for _, spec := range d.Specs {
-//                s := spec.(*ast.ImportSpec)
-//                fmt.Println(s.Path.Value)
-//            }
-//        case token.TYPE:
-//            fmt.Println("### type")
-//            for _, spec := range d.Specs {
-//                s := spec.(*ast.TypeSpec)
-//                fmt.Println(s.Name)
-//                fmt.Println(s.Comment.Text()) // Struct Comment
-//                switch t := s.Type.(type) {
-//                case *ast.InterfaceType:
-//                    for _, m := range t.Methods.List {
-//                        fmt.Println(m)
-//                    }
-//                case *ast.StructType:
-//                    for _, f := range t.Fields.List {
-//                        fmt.Println(f)
-//                        fmt.Println(f.Tag) // Field Tag
-//                        fmt.Println(f.Comment.Text()) // Field Comment
-//                    }
-//                default:
-//                    fmt.Println(3, t)
-//                }
-//            }
-//        case token.CONST:
-//        case token.VAR:
-//        default:
-//        }
-//    case *ast.FuncDecl:
-//        fmt.Println("### function")
-//        fmt.Println(d.Name)
-//        if d.Recv != nil {
-//            fmt.Println(d.Recv.List[0].Type)
-//        }
-//        if d.Type.Params != nil && d.Type.Params.NumFields() > 0 {
-//            fmt.Println("##### args")
-//            for _, p := range d.Type.Params.List {
-//                fmt.Println(p.Type, p.Names)
-//            }
-//        }
-//        if d.Type.Results != nil && d.Type.Results.NumFields() > 0 {
-//            fmt.Println("##### returns")
-//            for _, r := range d.Type.Results.List {
-//                fmt.Println(r.Type, r.Names)
-//            }
-//        }
-//    default:
-//    }
-//    fmt.Println()
-//}
-
-// // TODO
-// fmt.Println(inputPath, outputPath)
-//
-// // TODO
-// d := &TypeVars {"MyName"}
-// err = tmap["Insert"].Execute(os.Stdout, d)
-// if err != nil {
-//     panic(err)
-// }
-
-//fmt.Println(s.Name)
-//fmt.Println(s.Comment.Text()) // Struct Comment
-//for _, f := range t.Fields.List {
-//    fmt.Println(f)
-//    fmt.Println(f.Tag) // Field Tag
-//    fmt.Println(f.Comment.Text()) // Field Comment
-//}
 
