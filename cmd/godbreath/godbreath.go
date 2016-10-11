@@ -1,16 +1,17 @@
 package main
 
 import (
+    _ "os"
     "fmt"
     "log"
     "go/ast"
     "go/parser"
     "go/token"
-    _ "os"
     "path"
     "flag"
     "bytes"
     "strings"
+    "reflect"
     "path/filepath"
     "io/ioutil"
     "text/template"
@@ -24,8 +25,11 @@ type (
     }
 
     TypeVars struct {
-        TypeName    string
-        type_fields []string
+        TypeName       string
+        TableName      string
+        Columns        []string
+        UpdateColumns  []string
+        PrivateColumns []string
     }
 )
 
@@ -80,11 +84,17 @@ func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Te
                     s := spec.(*ast.TypeSpec)
                     switch t := s.Type.(type) {
                     case *ast.StructType:
-                        methods := strings.Split(s.Comment.Text(), ",")
+                        c := s.Comment.Text()
+                        defs := strings.Split(c, ":")
+                        if len(defs) != 2 {
+                            continue
+                        }
+                        tableName := strings.Trim(defs[0], " \n")
+                        methods   := strings.Split(defs[1], ",")
                         for _, method := range methods {
                             m := strings.Trim(method, " \n")
                             if tmap[m] != nil {
-                                genImports, genFunc := GenerateStruct(s, t, tmap[m])
+                                genImports, genFunc := GenerateStruct(s, t, tableName, tmap[m])
                                 outputImports = append(outputImports, genImports...)
                                 outputFuncs   = append(outputFuncs, genFunc)
                             }
@@ -110,18 +120,31 @@ func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Te
     return true
 }
 
-func GenerateStruct(s *ast.TypeSpec, t *ast.StructType, temp *Template) (typeImports []string, typeFunc string) {
+func GenerateStruct(s *ast.TypeSpec, t *ast.StructType, tableName string, temp *Template) (typeImports []string, typeFunc string) {
     // type name and fields
-    TypeName    := s.Name.String()
-    type_fields := []string{}
+    TypeName       := s.Name.String()
+    TableName      := tableName
+    Columns        := []string{}
+    UpdateColumns  := []string{}
+    PrivateColumns := []string{}
     for _, f := range t.Fields.List {
-        fmt.Println(f)
-        fmt.Println(f.Tag) // Field Tag
-        fmt.Println(f.Comment.Text()) // Field Comment
+        tag := reflect.StructTag(f.Tag.Value[1:len(f.Tag.Value)-1])
+        db  := tag.Get("db")
+        if db != "" {
+            Columns = append(Columns, db)
+            auto    := tag.Get("auto")
+            private := tag.Get("private")
+            if auto != "true" && private != "true" {
+                UpdateColumns = append(UpdateColumns, db)
+            }
+            if private == "true" {
+                PrivateColumns = append(PrivateColumns, db)
+            }
+        }
     }
 
     // expand template
-    vars := &TypeVars {TypeName, type_fields}
+    vars := &TypeVars {TypeName, TableName, Columns, UpdateColumns, PrivateColumns}
     buf  := &bytes.Buffer{}
     err  := temp.TemplateFunc.Execute(buf, vars)
     if err != nil {

@@ -1,8 +1,8 @@
 package test
 
 type User struct {
-    Id   int    `db:"id"`
+    Id   int    `db:"id" auto:"true"`
     Uuid string `db:"uuid"`
     Name string `db:"name"`
-} // Insert
+} // user: Insert
 
