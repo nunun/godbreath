@@ -26,11 +26,11 @@ type (
     }
 
     TypeVars struct {
-        TypeName       string
-        TableName      string
-        Columns        []string
-        UpdateColumns  []string
-        LabeledColumns map[string][]string
+        TypeName          string
+        TableName         string
+        TableColumns      []string
+        NonLabeledColumns []string
+        LabeledColumns    map[string][]string
     }
 )
 
@@ -177,34 +177,34 @@ func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Te
 
 func GenerateStruct(s *ast.TypeSpec, t *ast.StructType, tableName string, temp *Template) (typeImports []string, typeFunc string) {
     // type name and fields
-    TypeName       := s.Name.String()
-    TableName      := tableName
-    Columns        := []string{}
-    UpdateColumns  := []string{}
-    LabeledColumns := map[string][]string{}
+    TypeName          := s.Name.String()
+    TableName         := tableName
+    TableColumns      := []string{}
+    NonLabeledColumns := []string{}
+    LabeledColumns    := map[string][]string{}
     for _, f := range t.Fields.List {
         tag := reflect.StructTag(f.Tag.Value[1:len(f.Tag.Value)-1])
         db  := tag.Get("db")
         if db != "" {
-            Columns = append(Columns, db)
-            kind := tag.Get("dblabel")
-            if kind == "" {
-                UpdateColumns = append(UpdateColumns, db)
+            TableColumns = append(TableColumns, db)
+            dblabel := tag.Get("dblabel")
+            if dblabel == "" {
+                NonLabeledColumns = append(NonLabeledColumns, db)
             } else {
-                kinds := strings.Split(kind, ",")
-                for _, k := range kinds {
-                    key := strings.Trim(k, " ")
-                    if LabeledColumns[key] == nil {
-                        LabeledColumns[key] = []string {}
+                dblabels := strings.Split(dblabel, ",")
+                for _, label := range dblabels {
+                    label := strings.Trim(label, " ")
+                    if LabeledColumns[label] == nil {
+                        LabeledColumns[label] = []string {}
                     }
-                    LabeledColumns[key] = append(LabeledColumns[key], db)
+                    LabeledColumns[label] = append(LabeledColumns[label], db)
                 }
             }
         }
     }
 
     // expand template
-    vars := &TypeVars {TypeName, TableName, Columns, UpdateColumns, LabeledColumns}
+    vars := &TypeVars {TypeName, TableName, TableColumns, NonLabeledColumns, LabeledColumns}
     buf  := &bytes.Buffer{}
     err  := temp.TemplateFunc.Execute(buf, vars)
     if err != nil {

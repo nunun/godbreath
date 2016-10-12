@@ -3,9 +3,9 @@ Insert:
     - "os"
   func: |
     func Insert{{.TypeName}}(data *{{.TypeName}}) {
-      // TypeName       = {{.TypeName}}
-      // TableName      = {{.TableName}}
-      // Columns        = {{.Columns}}
-      // UpdateColumns  = {{.UpdateColumns}}
-      // LabeledColumns = {{.LabeledColumns}}
+      // TypeName          = {{.TypeName}}
+      // TableName         = {{.TableName}}
+      // TableColumns      = {{.TableColumns}}
+      // NonLabeledColumns = {{.NonLabeledColumns}}
+      // LabeledColumns    = {{.LabeledColumns}}
     }
