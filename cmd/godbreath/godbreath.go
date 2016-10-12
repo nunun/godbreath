@@ -35,19 +35,23 @@ type (
 )
 
 func main() {
+    var help  bool
     var tpath string
+    flag.BoolVar(&help, "h", false, "show help")
     flag.StringVar(&tpath, "t", "gen.yml", "template path")
     flag.Parse();
-    if flag.NArg() < 1 {
+    if help {
         fmt.Println("godbreath [-t <template path>] <source path>")
         fmt.Println("  ex) godbreath -t gen.yml src/")
         fmt.Println("")
         flag.PrintDefaults()
-        fmt.Println("")
-        fmt.Println("error: <source path> did not specified.")
         return
     }
-    Generate(flag.Arg(0), tpath)
+    gpath := "."
+    if flag.NArg() >= 1 {
+        gpath = flag.Arg(0)
+    }
+    Generate(gpath, tpath)
 }
 
 func Generate(generatePath string, templatePath string) {
