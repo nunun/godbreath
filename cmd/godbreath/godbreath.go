@@ -34,10 +34,14 @@ type (
     }
 )
 
+var (
+    help     bool
+    noremove bool
+    tpath    string
+)
+
 func main() {
-    var help  bool
-    var tpath string
-    flag.BoolVar(&help, "h", false, "show help")
+    flag.BoolVar(&help,    "h", false,     "show this help")
     flag.StringVar(&tpath, "t", "gen.yml", "template path")
     flag.Parse();
     if help {
@@ -126,6 +130,17 @@ func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Te
         case *ast.FuncDecl:
         default:
         }
+    }
+
+    // empty?
+    if len(outputFuncs) <= 0 {
+        // remove generate file if exists.
+        _, err := os.Stat(outputPath)
+        if err == nil {
+            os.Remove(outputPath)
+            fmt.Println("Removed", outputPath)
+        }
+        return true
     }
 
     // unique imports array
