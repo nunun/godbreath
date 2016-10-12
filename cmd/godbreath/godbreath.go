@@ -131,15 +131,15 @@ func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Te
         }
     }
 
-    // remove generate file if exists.
-    _, err = os.Stat(outputPath)
-    if err == nil {
-        os.Remove(outputPath)
-        fmt.Println("Removed", outputPath)
-    }
 
     // empty?
     if len(outputFuncs) <= 0 {
+        // remove generate file if exists.
+        _, err = os.Stat(outputPath)
+        if err == nil {
+            os.Remove(outputPath)
+            fmt.Println("Removed", outputPath)
+        }
         return true
     }
 
@@ -254,7 +254,7 @@ func LoadTemplate(templatePath string) map[string]*Template {
 
 
 func NewFile(fn string) *os.File {
-    fp, err := os.OpenFile(fn, os.O_WRONLY | os.O_CREATE, 0644)
+    fp, err := os.OpenFile(fn, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0644)
     if err != nil {
         panic(err)
     }
