@@ -30,7 +30,7 @@ type (
         TableName      string
         Columns        []string
         UpdateColumns  []string
-        PrivateColumns []string
+        KindColumns    map[string][]string
     }
 )
 
@@ -181,25 +181,30 @@ func GenerateStruct(s *ast.TypeSpec, t *ast.StructType, tableName string, temp *
     TableName      := tableName
     Columns        := []string{}
     UpdateColumns  := []string{}
-    PrivateColumns := []string{}
+    KindColumns    := map[string][]string{}
     for _, f := range t.Fields.List {
         tag := reflect.StructTag(f.Tag.Value[1:len(f.Tag.Value)-1])
         db  := tag.Get("db")
         if db != "" {
             Columns = append(Columns, db)
-            auto    := tag.Get("auto")
-            private := tag.Get("private")
-            if auto != "true" && private != "true" {
+            kind := tag.Get("dbkind")
+            if kind == "" {
                 UpdateColumns = append(UpdateColumns, db)
-            }
-            if private == "true" {
-                PrivateColumns = append(PrivateColumns, db)
+            } else {
+                kinds := strings.Split(kind, ",")
+                for _, k := range kinds {
+                    key := strings.Trim(k, " ")
+                    if KindColumns[key] == nil {
+                        KindColumns[key] = []string {}
+                    }
+                    KindColumns[key] = append(KindColumns[key], db)
+                }
             }
         }
     }
 
     // expand template
-    vars := &TypeVars {TypeName, TableName, Columns, UpdateColumns, PrivateColumns}
+    vars := &TypeVars {TypeName, TableName, Columns, UpdateColumns, KindColumns}
     buf  := &bytes.Buffer{}
     err  := temp.TemplateFunc.Execute(buf, vars)
     if err != nil {
