@@ -5,6 +5,6 @@ func InsertUser(data *User) {
   // TableName      = user
   // Columns        = [id uuid name]
   // UpdateColumns  = [uuid name]
-  // KindColumns    = map[auto:[id] private:[id]]
+  // LabeledColumns = map[auto:[id]]
 }
 

@@ -7,5 +7,5 @@ Insert:
       // TableName      = {{.TableName}}
       // Columns        = {{.Columns}}
       // UpdateColumns  = {{.UpdateColumns}}
-      // KindColumns    = {{.KindColumns}}
+      // LabeledColumns = {{.LabeledColumns}}
     }
