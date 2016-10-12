@@ -35,18 +35,19 @@ type (
 )
 
 var (
-    help  bool
-    tpath string
+    help    bool
+    silent  bool
+    verbose bool
+    tpath   string
 )
 
 func main() {
-    flag.BoolVar(&help,    "h", false,     "show this help")
+    flag.BoolVar(&help,    "h", false,     "show help")
+    flag.BoolVar(&silent,  "s", false,     "silent mode")
+    flag.BoolVar(&verbose, "v", false,     "verbose mode")
     flag.StringVar(&tpath, "t", "gen.yml", "template path")
     flag.Parse();
     if help {
-        fmt.Println("godbreath [-t <template path>] <source path>")
-        fmt.Println("  ex) godbreath -t gen.yml src/")
-        fmt.Println("")
         flag.PrintDefaults()
         return
     }
@@ -70,17 +71,28 @@ func Generate(generatePath string, templatePath string) {
     }
 
     // generate _gen.go from source file.
+    cnt := 0
     for _, f := range files {
         if strings.HasSuffix(f, "_gen.go") {
             continue // 生成ファイルは処理しない。
         }
-        var ext = filepath.Ext(f)
-        var of  = fmt.Sprintf("%s_gen.go", f[0:len(f)-len(ext)])
-        GenerateSourceFile(f, of, tmap)
+        ext  := filepath.Ext(f)
+        of   := fmt.Sprintf("%s_gen.go", f[0:len(f)-len(ext)])
+        done := GenerateSourceFile(f, of, tmap)
+        if done {
+            cnt++;
+        }
+    }
+    if !silent {
+        fmt.Println("[godbreath]", cnt, "file(s) generated.")
     }
 }
 
 func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Template) bool {
+    if verbose {
+        fmt.Println(inputPath, "...");
+    }
+
     // parse .go
     fset := token.NewFileSet()
     src, err := parser.ParseFile(fset, inputPath, nil, parser.ParseComments)
@@ -138,9 +150,11 @@ func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Te
         _, err = os.Stat(outputPath)
         if err == nil {
             os.Remove(outputPath)
-            fmt.Println("Removed", outputPath)
+            if verbose {
+                fmt.Println("Removed", outputPath)
+            }
         }
-        return true
+        return false
     }
 
     // unique imports array
@@ -171,7 +185,9 @@ func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Te
         }
     }
     writer.Flush()
-    fmt.Println("Generated", outputPath)
+    if verbose {
+        fmt.Println(" ->", outputPath)
+    }
     return true
 }
 
