@@ -1,5 +1,5 @@
 # godbreath
-go + dbr + eath CRUD function generator.
+go + dbr + easy function generator.
 
 ## Install
 
@@ -13,7 +13,7 @@ set GOPATH, and
 
 place "user.go" and "gen.yml" into "src" directory, then manually
 
-    godbreath -t gen src/
+    godbreath -t gen.yml src/
 
 or go generate
 
