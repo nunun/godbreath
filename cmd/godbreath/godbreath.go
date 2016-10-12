@@ -35,9 +35,8 @@ type (
 )
 
 var (
-    help     bool
-    noremove bool
-    tpath    string
+    help  bool
+    tpath string
 )
 
 func main() {
@@ -132,14 +131,15 @@ func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Te
         }
     }
 
+    // remove generate file if exists.
+    _, err = os.Stat(outputPath)
+    if err == nil {
+        os.Remove(outputPath)
+        fmt.Println("Removed", outputPath)
+    }
+
     // empty?
     if len(outputFuncs) <= 0 {
-        // remove generate file if exists.
-        _, err := os.Stat(outputPath)
-        if err == nil {
-            os.Remove(outputPath)
-            fmt.Println("Removed", outputPath)
-        }
         return true
     }
 
