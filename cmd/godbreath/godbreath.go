@@ -42,10 +42,10 @@ var (
 )
 
 func main() {
-    flag.BoolVar(&help,    "h", false,     "show help")
-    flag.BoolVar(&silent,  "s", false,     "silent mode")
-    flag.BoolVar(&verbose, "v", false,     "verbose mode")
-    flag.StringVar(&tpath, "t", "gen.yml", "template path")
+    flag.BoolVar(&help,    "h", false, "show help")
+    flag.BoolVar(&silent,  "s", false, "silent mode")
+    flag.BoolVar(&verbose, "v", false, "verbose mode")
+    flag.StringVar(&tpath, "t", "",    "template path (default=<generate dir>/gen.yaml)")
     flag.Parse();
     if help {
         flag.PrintDefaults()
@@ -55,13 +55,15 @@ func main() {
     if flag.NArg() >= 1 {
         gpath = flag.Arg(0)
     }
+    if (tpath == "") {
+        tpath = path.Join(gpath, "gen.yml")
+    }
     Generate(gpath, tpath)
 }
 
 func Generate(generatePath string, templatePath string) {
     // load gen.yml
-    tpath := path.Join(generatePath, templatePath)
-    tmap  := LoadTemplate(tpath)
+    tmap := LoadTemplate(tpath)
 
     // gather targets
     gpath := path.Join(generatePath, "*.go")
