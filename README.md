@@ -5,7 +5,7 @@ go + dbr + easy function generator.
 
 set GOPATH, and
 
-    go get github.com/nunun/godbreath/cmd/godbreath
+    go get github.com/nunun/godbreath/
 
 ## How to use
 
