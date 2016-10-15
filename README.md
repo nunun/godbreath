@@ -29,7 +29,7 @@ or go generate
         Name string `db:"name"`
     } // user: Insert
 
-### gen.yml: define function templates.
+### gen.yml: define templates.
 
     Insert:
       import:
