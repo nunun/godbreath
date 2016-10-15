@@ -2,20 +2,20 @@ task "default" do
   system "rake -sT"
 end
 
-desc "clean generated files."
-task "clean" do
-  sh "rm -f test/*_gen.go"
-end
-
-desc "build godbreath and run test."
+desc "run test."
 task "test" do
-  sh "(cd cmd/godbreath; go get -v)"
-  sh "go run cmd/godbreath/godbreath.go test"
+  sh "go get -v"
+  sh "go run main.go test"
 end
 
 namespace "test" do
   desc "run help test."
   task "help" do
-    sh "go run cmd/godbreath/godbreath.go -h"
+    sh "go run main.go -h"
+  end
+
+  desc "clean generated files."
+  task "clean" do
+    sh "rm -f test/*_gen.go"
   end
 end
