@@ -5,7 +5,7 @@ Insert:
     func Insert{{.TypeName}}(data *{{.TypeName}}) {
       // TypeName          = {{.TypeName}}
       // TableName         = {{.TableName}}
-      // TableColumns      = {{.TableColumns}}
-      // NonLabeledColumns = {{.NonLabeledColumns}}
+      // TableColumns      = {{joinq .TableColumns}}
+      // NonLabeledColumns = {{joinq .NonLabeledColumns}}
       // LabeledColumns    = {{.LabeledColumns}}
     }

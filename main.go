@@ -256,7 +256,13 @@ func LoadTemplate(templatePath string) map[string]*Template {
 
         // template functions
         funcMap := template.FuncMap {
-            "q": func(s string) string { return "\"" + s + "\"" },
+            "q": func(s string) string {
+                return "\"" + s + "\""
+            },
+            "joinq": func(s []string) string {
+                if len(s) <= 0 { return "" }
+                return "\"" + strings.Join(s, "\", \"") + "\"";
+            },
         }
 
         // import
