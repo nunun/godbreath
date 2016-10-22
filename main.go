@@ -119,6 +119,9 @@ func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Te
                         c := s.Comment.Text()
                         defs := strings.Split(c, ":")
                         if len(defs) != 2 {
+                            if verbose {
+                                fmt.Println(s.Name.String(), "  has no table name.")
+                            }
                             continue
                         }
                         tableName := strings.Trim(defs[0], " \n")
@@ -129,6 +132,8 @@ func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Te
                                 genImports, genFunc := GenerateStruct(s, t, tableName, tmap[m])
                                 outputImports = append(outputImports, genImports...)
                                 outputFuncs   = append(outputFuncs, genFunc)
+                            } else {
+                                panic("method '" + m + "' not found.")
                             }
                         }
                     case *ast.InterfaceType:
