@@ -254,6 +254,11 @@ func LoadTemplate(templatePath string) map[string]*Template {
     for k, v := range d {
         m := v.(map[interface{}]interface{})
 
+        // template functions
+        funcMap := template.FuncMap {
+            "q": func(s string) string { return "\"" + s + "\"" },
+        }
+
         // import
         templateImports := []string{}
         if m["import"] != nil {
@@ -264,10 +269,11 @@ func LoadTemplate(templatePath string) map[string]*Template {
         }
 
         // func
-        templateFunc, err := template.New(k).Parse(m["func"].(string))
+        templateFunc, err := template.New(k).Funcs(funcMap).Parse(m["func"].(string))
         if err != nil {
             panic(err)
         }
+
 
         // push all information into map
         tmap[k] = &Template{templateImports, templateFunc}
