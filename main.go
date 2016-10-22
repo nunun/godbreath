@@ -135,13 +135,16 @@ func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Te
                         tableName := defs[0]
                         methods   := strings.Split(defs[1], ",")
                         for _, method := range methods {
-                            m := method //strings.Trim(method, " \n")
+                            m := strings.Trim(method, " \n")
                             if tmap[m] != nil {
                                 genImports, genFunc := GenerateStruct(s, t, tableName, tmap[m])
                                 outputImports = append(outputImports, genImports...)
                                 outputFuncs   = append(outputFuncs, genFunc)
                             } else {
-                                panic("method '" + m + "' not found.")
+                                if verbose {
+                                    fmt.Println(" !! method '" + m + "' not found.")
+                                }
+                                continue;
                             }
                         }
                     case *ast.InterfaceType:
