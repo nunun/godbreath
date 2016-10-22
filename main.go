@@ -142,7 +142,7 @@ func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Te
                                 outputFuncs   = append(outputFuncs, genFunc)
                             } else {
                                 if verbose {
-                                    fmt.Println(" !! method '" + m + "' not found.")
+                                    fmt.Println(" ?? method '" + m + "' not found.")
                                 }
                                 continue;
                             }
