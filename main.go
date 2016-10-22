@@ -120,7 +120,7 @@ func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Te
                         defs := strings.Split(c, ":")
                         if len(defs) != 2 {
                             if verbose {
-                                fmt.Println(s.Name.String(), "  has no table name.")
+                                fmt.Println(" !! type '", s.Name.String(), "' has no table name. (", c, ")")
                             }
                             continue
                         }
