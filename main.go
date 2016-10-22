@@ -130,10 +130,12 @@ func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Te
                             }
                             continue
                         }
-                        tableName := strings.Trim(defs[0], " \n")
+                        defs[0]    = strings.Trim(defs[0], " /")
+                        defs[1]    = strings.Trim(defs[1], " \n")
+                        tableName := defs[0]
                         methods   := strings.Split(defs[1], ",")
                         for _, method := range methods {
-                            m := strings.Trim(method, " \n")
+                            m := method //strings.Trim(method, " \n")
                             if tmap[m] != nil {
                                 genImports, genFunc := GenerateStruct(s, t, tableName, tmap[m])
                                 outputImports = append(outputImports, genImports...)
