@@ -31,6 +31,7 @@ type (
         TableColumns      []string
         NonLabeledColumns []string
         LabeledColumns    map[string][]string
+        ToFieldName       map[string]string
     }
 )
 
@@ -216,6 +217,7 @@ func GenerateStruct(s *ast.TypeSpec, t *ast.StructType, tableName string, temp *
     TableColumns      := []string{}
     NonLabeledColumns := []string{}
     LabeledColumns    := map[string][]string{}
+    ToFieldName       := map[string]string{}
     for _, f := range t.Fields.List {
         tag := reflect.StructTag(f.Tag.Value[1:len(f.Tag.Value)-1])
         db  := tag.Get("db")
@@ -234,11 +236,12 @@ func GenerateStruct(s *ast.TypeSpec, t *ast.StructType, tableName string, temp *
                     LabeledColumns[label] = append(LabeledColumns[label], db)
                 }
             }
+            ToFieldName[db] = f.Names[0].Name
         }
     }
 
     // expand template
-    vars := &TypeVars {TypeName, TableName, TableColumns, NonLabeledColumns, LabeledColumns}
+    vars := &TypeVars {TypeName, TableName, TableColumns, NonLabeledColumns, LabeledColumns, ToFieldName}
     buf  := &bytes.Buffer{}
     err  := temp.TemplateFunc.Execute(buf, vars)
     if err != nil {

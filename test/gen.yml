@@ -8,4 +8,5 @@ Insert:
       // TableColumns      = {{joinq .TableColumns}}
       // NonLabeledColumns = {{joinq .NonLabeledColumns}}
       // LabeledColumns    = {{.LabeledColumns}}
+      // ToFieldName       = {{.ToFieldName}}
     }

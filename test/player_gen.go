@@ -6,5 +6,6 @@ func InsertPlayer(data *Player) {
   // TableColumns      = "id", "uuid", "name"
   // NonLabeledColumns = "uuid", "name"
   // LabeledColumns    = map[auto:[id]]
+  // ToFieldName       = map[id:Id uuid:Uuid name:Name]
 }
 
