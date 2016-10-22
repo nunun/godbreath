@@ -116,7 +116,13 @@ func GenerateSourceFile(inputPath string, outputPath string, tmap map[string]*Te
                     s := spec.(*ast.TypeSpec)
                     switch t := s.Type.(type) {
                     case *ast.StructType:
-                        c := s.Comment.Text()
+                        if d.Doc == nil {
+                            if verbose {
+                                fmt.Println(" !! type '", s.Name.String(), "' has no doc comment.")
+                            }
+                            continue
+                        }
+                        c := d.Doc.List[len(d.Doc.List) - 1].Text
                         defs := strings.Split(c, ":")
                         if len(defs) != 2 {
                             if verbose {
