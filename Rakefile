@@ -2,20 +2,20 @@ task "default" do
   system "rake -sT"
 end
 
-desc "run test."
-task "test" do
+desc "run debug"
+task "debug" do
   sh "go get -v"
-  sh "go run main.go test"
+  sh "go run main.go -v debug"
 end
 
-namespace "test" do
-  desc "run help test."
+namespace "debug" do
+  desc "run help debug"
   task "help" do
     sh "go run main.go -h"
   end
 
   desc "clean generated files."
   task "clean" do
-    sh "rm -f test/*_gen.go"
+    sh "rm -f debug/*_gen.go"
   end
 end
